@@ -50,10 +50,10 @@
       "logo": "https://mediaready.videoready.tv/tatasky-epg/image/fetch/f_auto,fl_lossy,q_auto,h_250,w_250/https://ltsk-cdn.s3.eu-west-1.amazonaws.com/jumpstart/Temp_Live/cdn/HLS/Channel/imageContent-35365-jr3xz4uo-v5/imageContent-35365-jr3xz4uo-m6.png"
     },
     {
-      "channel_name": "Hungama TV",
-      "target":"http://yuvraj43.rf.gd/hungama",
+      "channel_id": "652",
+      "channel_name":"Hungama",
       "channel_genre": "Kids",
-     "logo": "assets/hungama-tv.png"
+     "logo": "https://mediaready.videoready.tv/tatasky-epg/image/fetch/f_auto,fl_lossy,q_auto,h_250,w_250/https://ltsk-cdn.s3.eu-west-1.amazonaws.com/jumpstart/Temp_Live/cdn/HLS/Channel/imageContent-11479-j9jr9a8o-v1/imageContent-11479-j9jr9a8o-m1.png"
     },
     {
       "channel_id": "114",
