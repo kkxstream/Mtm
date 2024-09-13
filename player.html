@@ -1,0 +1,179 @@
+<!-- Source code by @kkxstream -->
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>TataPLay-WEB</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="custom.css">
+    <script src="https://content.jwplatform.com/libraries/KB5zFt7A.js"></script>
+    <style>
+        body {
+            margin: 0;
+        }
+
+        .jwplayer {
+            position: absolute !important;
+        }
+
+        .jwplayer.jw-flag-aspect-mode {
+            min-height: 100%;
+            max-height: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="jwplayerDiv"></div>
+    <script>
+        let stretchModes = ['uniform', 'exactfit', 'fill', 'none'];
+        let currentStretchModeIndex = 0;
+
+        // JW Player enhanced configuration by @yuvraj824
+        const urlParams = new URLSearchParams(window.location.search);
+        const channelId = urlParams.get('channel');
+        const streamUrl = `https://yuvraj43.xyz/web/manifest.php?id=${channelId}`;
+        const licenseUrl = `https://yuvraj43.xyz/web/lic.php?id=${channelId}`;
+
+        fetchLicenseData(licenseUrl)
+            .then(licenseData => {
+                if (typeof licenseData === 'string' && licenseData === 'error') {
+                    showNotice('There is an error. (error 1)');
+                } else {
+                    const playerInstance = jwplayer("jwplayerDiv").setup({
+                        controls: true,
+                        sharing: false,
+                        displaytitle: false,
+                        displaydescription: false,
+                        abouttext: "source code by @kkxstream",
+                        aboutlink: "https://t.me/kkxstream",
+                        file: streamUrl,
+                        type: 'dash',
+                        width: '100%',
+                        position: 'bottom',
+                        aspectratio: '16:9',
+                        autostart: true,
+                        mute: false,
+                        primary: 'html5',
+                        stretching: "exactfit",
+                        skin: {
+                            name: "netflix"
+                        },
+                        drm: {
+                            clearkey: {
+                                keyId: licenseData.lic_keyId,
+                                key: licenseData.lic_key
+                            }
+                        }
+                    });
+
+                    playerInstance.on("ready", function () {
+
+                        // Add custom button to toggle aspect ratio
+                        playerInstance.addButton(
+                            "aspect-ratio.png", // URL to an icon
+                            "Toggle Aspect Ratio", // Tooltip
+                            function () {
+                                currentStretchModeIndex = (currentStretchModeIndex + 1) % stretchModes.length;
+                                let selectedStretchMode = stretchModes[currentStretchModeIndex];
+
+                                // Update the player with the new stretching mode
+                                playerInstance.setConfig({
+                                    stretching: selectedStretchMode
+                                });
+                            },
+                            "aspectRatioButton",  // Unique ID for the button
+                            "control-bar",        // Where the button will be added
+                            "right"               // Position of the button within the control bar
+                        );
+
+                        // Custom control bar with forward and rewind buttons
+                        const playerContainer = playerInstance.getContainer();
+                        const rewindContainer = playerContainer.querySelector(".jw-display-icon-rewind");
+                        const forwardContainer = rewindContainer.cloneNode(true);
+                        const forwardDisplayButton = forwardContainer.querySelector(".jw-icon-rewind");
+                        forwardDisplayButton.style.transform = "scaleX(-1)";
+                        forwardDisplayButton.ariaLabel = "Forward 10 Seconds";
+                        const nextContainer = playerContainer.querySelector(".jw-display-icon-next");
+                        nextContainer.parentNode.insertBefore(forwardContainer, nextContainer);
+
+                        // Hide next button
+                        playerContainer.querySelector(".jw-display-icon-next").style.display = "none";
+
+                        // Add forward button to control bar
+                        const buttonContainer = playerContainer.querySelector(".jw-button-container");
+                        const rewindControlBarButton = buttonContainer.querySelector(".jw-icon-rewind");
+                        const forwardControlBarButton = rewindControlBarButton.cloneNode(true);
+                        forwardControlBarButton.style.transform = "scaleX(-1)";
+                        forwardControlBarButton.ariaLabel = "Forward 10 Seconds";
+                        rewindControlBarButton.parentNode.insertBefore(forwardControlBarButton, rewindControlBarButton.nextElementSibling);
+
+                        // Add click handlers
+                        [forwardDisplayButton, forwardControlBarButton].forEach((button) => {
+                            button.onclick = () => {
+                                playerInstance.seek(playerInstance.getPosition() + 10);
+                            };
+                        });
+                    });
+
+                    // Custom error handling
+                    playerInstance.on('error', function (e) {
+                        showNotice(`Playback error: ${e.message}. Please try again later.`);
+                    });
+
+                    // Quality selection
+                    playerInstance.on('levels', function (e) {
+                        if (e.levels.length > 1) {
+                            const qualityContainer = document.createElement('div');
+                            qualityContainer.className = 'jw-quality-selector';
+                            e.levels.forEach((level, index) => {
+                                const qualityButton = document.createElement('button');
+                                qualityButton.textContent = level.label;
+                                qualityButton.onclick = () => playerInstance.setCurrentQuality(index);
+                                qualityContainer.appendChild(qualityButton);
+                            });
+                            playerContainer.appendChild(qualityContainer);
+                        }
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching license data:', error);
+                showNotice('There is an error. (error 2)');
+            });
+
+        // Function to fetch license data
+        function fetchLicenseData(url) {
+            return fetch(url)
+                .then(response => response.json())
+                .catch(error => {
+                    console.error('Error fetching license data:', error);
+                    throw error;
+                });
+        }
+
+        // Function to show notice
+        function showNotice(message) {
+            const playerContainer = document.querySelector('.player-container');
+            const noticeDiv = document.createElement('div');
+            noticeDiv.classList.add('notice');
+            noticeDiv.textContent = message;
+            playerContainer.appendChild(noticeDiv);
+        }
+
+        // Log console errors to the notice div
+        window.addEventListener('error', event => {
+            const playerContainer = document.querySelector('.player-container');
+            const noticeDiv = playerContainer.querySelector('.notice') || document.createElement('div');
+            noticeDiv.classList.add('notice');
+            noticeDiv.textContent = `Error: ${event.error.message}`;
+            if (!playerContainer.querySelector('.notice')) {
+                playerContainer.appendChild(noticeDiv);
+            }
+        });
+    </script>
+</body>
+
+</html>
+<!-- Source code by @kkxstream -->
