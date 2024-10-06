@@ -33,8 +33,8 @@
         // JW Player enhanced configuration by @kkxstream
         const urlParams = new URLSearchParams(window.location.search);
         const channelId = urlParams.get('channel');
-        const streamUrl = `https://yuvraj43.xyz/web/manifest.php?id=${channelId}`;
-        const licenseUrl = `https://yuvraj43.xyz/web/lic.php?id=${channelId}`;
+        const streamUrl = `https://playflix007-ivory.vercel.app/mpd?id=${channelId}`;
+        const licenseUrl = `https://playflix007-ivory.vercel.app/key?id=${channelId}`;
 
         fetchLicenseData(licenseUrl)
             .then(licenseData => {
