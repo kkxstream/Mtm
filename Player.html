@@ -1,0 +1,187 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KK Xstream Play</title>
+    <link href="https://fonts.googleapis.com/css2?family=Oxanium:wght@400;600;800&display=swap" rel="stylesheet"> 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #222;
+            --secondary-color: #333;
+            --accent-color: #00aaff;
+            --text-color: #FFF;
+            --footer-color: #111;
+            --footer-text-color: #FFF;
+            --shadow-color: rgba(0, 0, 0, 0.5);
+            --header-bg: #333;
+            --header-text-color: #FFF;
+            --header-shadow: rgba(0, 0, 0, 0.5);
+        }
+
+        body {
+            font-family: 'Oxanium', sans-serif;
+            background-color: var(--primary-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .header {
+            background-color: var(--header-bg);
+            box-shadow: 0 4px 8px var(--header-shadow);
+            padding: 5px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            animation: fadeInDown 0.0s ease-in-out;
+        }
+
+        .header .logo {
+            font-size: 16px;
+            font-weight: 900;
+            padding: 8px;
+            color: var(--header-text-color);
+            text-decoration: none;
+            white-space: nowrap;
+            animation: slideInLeft 0.0s ease-in-out;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
+        }
+
+        .player-container {
+            max-width: 800px;
+            margin: 20px auto;
+            text-align: center;
+            padding: 20px;
+            background-color: var(--secondary-color);
+            box-shadow: 0 4px 8px var(--shadow-color);
+            border-radius: 10px;
+            animation: fadeIn 0.5s ease-in-out;
+            position: relative;
+        }
+
+        .footer {
+            background-color: var(--footer-color);
+            padding: 5px;
+            text-align: center;
+            font-size: 14px;
+            color: var(--footer-text-color);
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            animation: fadeInUp 0.5s ease-in-out;
+        }
+
+        .notice {
+            color: var(--text-color);
+            font-weight: 600;
+            text-align: center;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideInLeft {
+            from { transform: translateX(-100%); }
+            to { transform: translateX(0); }
+        }
+
+    </style>
+</head>
+<body>
+    <header class="header">
+        <a href="https://t.me/kkxstream" class="logo">📺 KK Xstream Play</a>
+ 		<a href="#" class="logo"> 🔴 LIVE </a>    
+        </header> 
+    </div>
+    <div class="player-container">
+        <div id="player"></div>
+    </div>
+    <div class="footer">
+        © 2024 KK Xstream
+    </div>
+
+    <script>
+        
+        // JW Player configuration
+        const urlParams = new URLSearchParams(window.location.search);
+        const channelId = urlParams.get('channel');
+        const streamUrl = `https://yuvraj43.xyz/web/manifest.php?id=${channelId}`;
+        const licenseUrl = `https://yuvraj43.xyz/web/lic.php?id=${channelId}`;
+
+        fetchLicenseData(licenseUrl)
+            .then(licenseData => {
+                if (typeof licenseData === 'string' && licenseData === 'error') {
+                    showNotice('There is an error. (error 1)');
+                } else {
+                    const player = jwplayer('player');
+                    player.setup({
+                        file: streamUrl,
+                        type: 'dash',
+                        width: '100%',
+                        aspectratio: '16:9',
+                        autostart: true,
+                        mute: false,
+                        primary: 'html5',
+                        drm: {
+                            clearkey: {
+                                keyId: licenseData.lic_keyId,
+                                key: licenseData.lic_key
+                            }
+                        }
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching license data:', error);
+                showNotice('❌ Error! Try refreshing the page.');
+            });
+
+        function fetchLicenseData(url) {
+            return fetch(url)
+                .then(response => response.json())
+                .catch(error => {
+                    console.error('Error fetching license data:', error);
+                    throw error;
+                });
+        }
+
+        function showNotice(message) {
+            const playerContainer = document.querySelector('.player-container');
+            const noticeDiv = document.createElement('div');
+            noticeDiv.classList.add('notice');
+            noticeDiv.textContent = message;
+            playerContainer.appendChild(noticeDiv);
+        }
+
+        window.addEventListener('error', event => {
+            const playerContainer = document.querySelector('.player-container');
+            const noticeDiv = playerContainer.querySelector('.notice');
+            if (noticeDiv) {
+                noticeDiv.textContent = `Error: ${event.error.message}`;
+            }
+        });
+    </script>
+    <!-- JW Player CDN -->
+    <script src="https://content.jwplatform.com/libraries/SAHhwvZq.js"></script>
+</body>
+</html>
